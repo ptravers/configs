@@ -1,6 +1,6 @@
 [user]
-	name = Jon Gjengset
-	email = jon@thesquareplanet.com
+	name = Peter Travers
+	email = traverspw@gmail.com
 [ui "color"]
 	ui = always
 [color]
@@ -27,16 +27,11 @@
 [push]
 	default = simple
 [help]
-	# https://blog.gitbutler.com/why-is-git-autocorrect-too-fast-for-formula-one-drivers/
-	autocorrect = prompt
-[url "git.launchpad.net"]
-	insteadOf = lp:
-[url "git@g.csail.mit.edu:"]
-	insteadOf = g:
+	autocorrect = 1
 [url "git@github.com:"]
-	insteadOf = gh:
+	insteadOf = g:
 [github]
-	user = jonhoo
+	user = ptravers
 [diff]
 	algorithm = histogram
 	indentHeuristic = true
