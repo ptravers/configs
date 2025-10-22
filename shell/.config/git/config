@@ -1,6 +1,7 @@
 [user]
 	name = Peter Travers
 	email = traverspw@gmail.com
+	signingKey = DA9818CABF5D269B
 [ui "color"]
 	ui = always
 [color]
@@ -49,3 +50,7 @@
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
+[commit]
+	gpgsign = true
+[tag]
+	gpgSign = true
