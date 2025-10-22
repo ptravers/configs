@@ -1,4 +1,26 @@
+# Dotfiles Configuration
+
 The configuration files are managed with [GNU Stow].
+
+## Quick Setup (Ubuntu/Debian)
+
+For a fresh Ubuntu installation, use the automated setup script:
+
+```console
+$ git clone git@github.com:ptravers/configs.git
+$ cd configs
+$ ./setup.sh
+```
+
+This will:
+- Install essential packages (fish, helix, jj, stow, tmux, fzf, etc.)
+- Back up existing dotfiles
+- Use stow to symlink all configuration groups
+- Set up fish as the default shell
+- Install NVM and pnpm
+
+## Manual Setup
+
 Each top-level directory represents a "group" of configs, and you can
 "install" (by symlinking) the configs of a group using
 
