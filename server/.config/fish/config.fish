@@ -8,6 +8,19 @@ abbr -a ct 'cargo t'
 abbr -a vim 'nvim'
 complete --command aurman --wraps pacman
 
+# macOS-style clipboard commands using xclip
+if command -v xclip >/dev/null
+    # pbcopy: copy to clipboard (like macOS)
+    function pbcopy
+        xclip -selection clipboard
+    end
+
+    # pbpaste: paste from clipboard (like macOS)
+    function pbpaste
+        xclip -selection clipboard -o
+    end
+end
+
 if command -v paru > /dev/null
 	abbr -a p 'paru'
 	abbr -a up 'paru -Syu'

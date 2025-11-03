@@ -5,6 +5,19 @@ abbr -a m make
 abbr -a o xdg-open
 abbr -a g git
 
+# macOS-style clipboard commands using xclip
+if command -v xclip >/dev/null
+    # pbcopy: copy to clipboard (like macOS)
+    function pbcopy
+        xclip -selection clipboard
+    end
+
+    # pbpaste: paste from clipboard (like macOS)
+    function pbpaste
+        xclip -selection clipboard -o
+    end
+end
+
 if status --is-interactive
     if test -d ~/dev/others/base16/templates/fish-shell
         set fish_function_path $fish_function_path ~/dev/others/base16/templates/fish-shell/functions
