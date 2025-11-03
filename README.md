@@ -2,7 +2,29 @@
 
 The configuration files are managed with [GNU Stow].
 
-## Quick Setup (Ubuntu/Debian)
+## Quick Setup
+
+### macOS
+
+For shell and editor configurations on macOS:
+
+```console
+$ git clone git@github.com:ptravers/configs.git
+$ cd configs
+$ ./setup_macos.sh
+```
+
+Prerequisites:
+- Homebrew must be installed ([brew.sh](https://brew.sh))
+
+This will:
+- Install essential packages (fish, helix, jj, stow, tmux, fzf, etc.)
+- Back up existing dotfiles
+- Use stow to symlink shell and editor configurations
+- Set up fish as the default shell
+- Install NVM and pnpm
+
+### Ubuntu/Debian
 
 For a fresh Ubuntu installation, use the automated setup script:
 
