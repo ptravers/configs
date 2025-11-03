@@ -73,14 +73,16 @@ brew install \
 print_status "Installing Fish shell..."
 if ! command -v fish &> /dev/null; then
     brew install fish
-
-    # Add fish to /etc/shells if not already there
-    if ! grep -q "$(brew --prefix)/bin/fish" /etc/shells; then
-        print_status "Adding fish to /etc/shells..."
-        echo "$(brew --prefix)/bin/fish" | sudo tee -a /etc/shells
-    fi
 else
     print_status "Fish already installed"
+fi
+
+# Check if fish is in /etc/shells
+FISH_PATH="$(brew --prefix)/bin/fish"
+if ! grep -q "$FISH_PATH" /etc/shells; then
+    print_warning "Fish is not in /etc/shells. You may need to add it manually:"
+    print_warning "  echo '$FISH_PATH' | sudo tee -a /etc/shells"
+    print_warning "This is required to use fish as your default shell."
 fi
 
 # Install Helix editor
@@ -158,11 +160,24 @@ else
 fi
 
 # Change default shell to fish
-print_status "Setting fish as default shell..."
+print_status "Checking default shell..."
 FISH_PATH="$(brew --prefix)/bin/fish"
 if [ "$SHELL" != "$FISH_PATH" ]; then
-    chsh -s "$FISH_PATH"
-    print_status "Default shell changed to fish. You'll need to open a new terminal for this to take effect."
+    # Check if fish is in /etc/shells before attempting to change shell
+    if grep -q "$FISH_PATH" /etc/shells; then
+        print_status "Attempting to set fish as default shell..."
+        if chsh -s "$FISH_PATH" 2>/dev/null; then
+            print_status "Default shell changed to fish. You'll need to open a new terminal for this to take effect."
+        else
+            print_warning "Could not change default shell automatically."
+            print_warning "To set fish as your default shell, run:"
+            print_warning "  chsh -s $FISH_PATH"
+        fi
+    else
+        print_warning "Cannot set fish as default shell because it's not in /etc/shells."
+        print_warning "First add it with: echo '$FISH_PATH' | sudo tee -a /etc/shells"
+        print_warning "Then run: chsh -s $FISH_PATH"
+    fi
 else
     print_status "Fish is already the default shell"
 fi
