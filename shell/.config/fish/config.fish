@@ -2,36 +2,37 @@ abbr -a yr 'cal -y'
 abbr -a c cargo
 abbr -a e hx
 abbr -a m make
-abbr -a o xdg-open
+switch (uname -s)
+    case Darwin
+        abbr -a o open
+    case Linux
+        abbr -a o xdg-open
+end
 abbr -a g git
 
-# macOS-style clipboard commands using xclip
-if command -v xclip >/dev/null
-    # pbcopy: copy to clipboard (like macOS)
+if test (uname -s) = Linux; and command -v xclip >/dev/null
     function pbcopy
         xclip -selection clipboard
     end
-
-    # pbpaste: paste from clipboard (like macOS)
     function pbpaste
         xclip -selection clipboard -o
     end
 end
 
-if status --is-interactive
+if status is-interactive
     if test -d ~/dev/others/base16/templates/fish-shell
         set fish_function_path $fish_function_path ~/dev/others/base16/templates/fish-shell/functions
         builtin source ~/dev/others/base16/templates/fish-shell/conf.d/base16.fish
     end
-	switch $TERM
-		case 'linux'
-			:
-		case '*'
-			if ! set -q TMUX
-				# ensure that the new tmux _also_ starts fish
-				exec tmux set-option -g default-shell (which fish) ';' new-session
-			end
-	end
+    switch $TERM
+        case linux
+            :
+        case '*'
+            if ! set -q TMUX
+                # ensure that the new tmux _also_ starts fish
+                exec tmux set-option -g default-shell (which fish) ';' new-session
+            end
+    end
 end
 
 if command -v eza >/dev/null
@@ -90,7 +91,7 @@ setenv FZF_CTRL_T_COMMAND 'fd --type file --follow'
 setenv FZF_DEFAULT_OPTS '--height 20%'
 
 function fish_user_key_bindings
-    bind \cz 'fg>/dev/null ^/dev/null'
+    bind \cz 'fg 2>/dev/null'
     if functions -q fzf_key_bindings
         fzf_key_bindings
     end
@@ -100,7 +101,7 @@ function fish_prompt
     set_color brblack
     echo -n "["(date "+%H:%M")"] "
     set_color blue
-    echo -n (hostnamectl hostname)
+    echo -n (hostname -s)
     if [ $PWD != $HOME ]
         set_color brblack
         echo -n ':'
@@ -116,48 +117,62 @@ end
 
 function fish_greeting
     echo
-    echo -e (uname -ro | awk '{print " \\\\e[1mOS: \\\\e[0;32m"$0"\\\\e[0m"}')
-    echo -e (uptime -p | sed 's/^up //' | awk '{print " \\\\e[1mUptime: \\\\e[0;32m"$0"\\\\e[0m"}')
-    echo -e (uname -n | awk '{print " \\\\e[1mHostname: \\\\e[0;32m"$0"\\\\e[0m"}')
-    echo -e " \\e[1mDisk usage:\\e[0m"
-    echo
-    echo -ne (\
-		df -l -h | grep -E 'dev/(nvme|sdb)' | \
-		awk '{printf "\\\\t%s / %4s %4s  %s\\\\n\n", $3, $2, $5, $6}' | \
-		paste -sd ''\
-	)
-    echo
 
-    echo -e " \\e[1mNetwork:\\e[0m"
-    echo
-    # http://tdt.rocks/linux_network_interface_naming.html
-    echo -ne (\
-		ip addr show up scope global | \
-			grep -E ': <|inet' | \
-			sed \
-				-e 's/^[[:digit:]]\+: //' \
-				-e 's/: <.*//' \
-				-e 's/.*inet[[:digit:]]* //' \
-				-e 's/\/.*//'| \
-			awk 'BEGIN {i=""} /\.|:/ {print i" "$0"\\\n"; next} // {i = $0}' | \
-			sort | \
-			column -t -R1 | \
-			# public addresses are underlined for visibility \
-			sed 's/ \([^ ]\+\)$/ \\\e[4m\1/' | \
-			# private addresses are not \
-			sed 's/m\(\(10\.\|172\.\(1[6-9]\|2[0-9]\|3[01]\)\|192\.168\.\).*\)/m\\\e[24m\1/' | \
-			# unknown interfaces are cyan \
-			sed 's/^\( *[^ ]\+\)/\\\e[36m\1/' | \
-			# ethernet interfaces are normal \
-			sed 's/\(\(en\|em\|eth\)[^ ]* .*\)/\\\e[39m\1/' | \
-			# wireless interfaces are purple \
-			sed 's/\(wl[^ ]* .*\)/\\\e[35m\1/' | \
-			# wwan interfaces are yellow \
-			sed 's/\(ww[^ ]* .*\).*/\\\e[33m\1/' | \
-			sed 's/$/\\\e[0m/' | \
-			sed 's/^/\t/' \
-		)
-    echo
+    switch (uname -s)
+        case Darwin
+            echo -e " \e[1mOS: \e[0;32m"(sw_vers -productName)" "(sw_vers -productVersion)"\e[0m"
+            echo -e " \e[1mUptime: \e[0;32m"(uptime | sed 's/.*up //' | sed 's/,.*//')"\e[0m"
+            echo -e " \e[1mHostname: \e[0;32m"(hostname -s)"\e[0m"
+            echo -e " \e[1mDisk usage:\e[0m"
+            echo
+            echo -ne (df -h / | tail -1 | awk '{printf "\\t%s / %4s %4s  %s\\n", $3, $2, $5, $9}')
+            echo
+            echo -e " \e[1mNetwork:\e[0m"
+            echo
+            for iface in (ifconfig -lu)
+                set ip (ifconfig $iface 2>/dev/null | grep 'inet ' | awk '{print $2}')
+                if test -n "$ip"
+                    printf "\t\e[36m%s\e[0m %s\n" $iface $ip
+                end
+            end
+            echo
+
+        case Linux
+            echo -e (uname -ro | awk '{print " \\\\e[1mOS: \\\\e[0;32m"$0"\\\\e[0m"}')
+            echo -e (uptime -p | sed 's/^up //' | awk '{print " \\\\e[1mUptime: \\\\e[0;32m"$0"\\\\e[0m"}')
+            echo -e (uname -n | awk '{print " \\\\e[1mHostname: \\\\e[0;32m"$0"\\\\e[0m"}')
+            echo -e " \\e[1mDisk usage:\\e[0m"
+            echo
+            echo -ne (\
+				df -l -h | grep -E 'dev/(nvme|sdb)' | \
+				awk '{printf "\\\\t%s / %4s %4s  %s\\\\n\n", $3, $2, $5, $6}' | \
+				paste -sd ''\
+			)
+            echo
+            echo -e " \\e[1mNetwork:\\e[0m"
+            echo
+            echo -ne (\
+				ip addr show up scope global | \
+					grep -E ': <|inet' | \
+					sed \
+						-e 's/^[[:digit:]]\+: //' \
+						-e 's/: <.*//' \
+						-e 's/.*inet[[:digit:]]* //' \
+						-e 's/\/.*//'| \
+					awk 'BEGIN {i=""} /\.|:/ {print i" "$0"\\\n"; next} // {i = $0}' | \
+					sort | \
+					column -t -R1 | \
+					sed 's/ \([^ ]\+\)$/ \\\e[4m\1/' | \
+					sed 's/m\(\(10\.\|172\.\(1[6-9]\|2[0-9]\|3[01]\)\|192\.168\.\).*\)/m\\\e[24m\1/' | \
+					sed 's/^\( *[^ ]\+\)/\\\e[36m\1/' | \
+					sed 's/\(\(en\|em\|eth\)[^ ]* .*\)/\\\e[39m\1/' | \
+					sed 's/\(wl[^ ]* .*\)/\\\e[35m\1/' | \
+					sed 's/\(ww[^ ]* .*\).*/\\\e[33m\1/' | \
+					sed 's/$/\\\e[0m/' | \
+					sed 's/^/\t/' \
+				)
+            echo
+    end
 
     set r (random 0 100)
     if [ $r -lt 5 ] # only occasionally show backlog (5%)
@@ -199,4 +214,8 @@ function fish_greeting
     end
 
     set_color normal
+end
+
+function jjpr --wraps='jj show' --description 'Opens the PR for a change in Linear' --argument-names change
+    linctl pr view (gh pr view (jj bookmark list -T name -r $change) --json number -q '.number')
 end

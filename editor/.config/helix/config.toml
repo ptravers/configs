@@ -2,7 +2,8 @@ theme = "tokyonight"
 
 [editor]
 line-number = "relative"
-mouse = false
+mouse = true
+cursorline = true
 
 [editor.cursor-shape]
 insert = "bar"
