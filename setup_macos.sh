@@ -159,6 +159,16 @@ else
     print_status "pnpm already installed"
 fi
 
+# Install uv (Python package manager)
+# UV_NO_MODIFY_PATH=1 prevents uv from appending broken source lines to .bashrc/.profile
+# (~/.local/bin is already in PATH via .profile, so uv is accessible without modification)
+print_status "Installing uv..."
+if ! command -v uv &> /dev/null; then
+    curl -LsSf https://astral.sh/uv/install.sh | UV_NO_MODIFY_PATH=1 sh
+else
+    print_status "uv already installed"
+fi
+
 # Change default shell to fish
 print_status "Checking default shell..."
 FISH_PATH="$(brew --prefix)/bin/fish"

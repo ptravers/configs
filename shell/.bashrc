@@ -15,7 +15,6 @@ export HISTIGNORE="clear:bg:fg:cd:cd -:cd ..:exit:date:w:* --help:ls:l:ll:lll"
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
-. "$HOME/.local/bin/env"
 export PATH="$PATH:/opt/mssql-tools18/bin"
 
 export NVM_DIR="$HOME/.nvm"
@@ -29,3 +28,4 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 # pnpm end
+

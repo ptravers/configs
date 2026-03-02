@@ -62,7 +62,8 @@ sudo apt install -y \
     stow \
     tmux \
     fzf \
-    fd-find
+    fd-find \
+    eza
 
 # Install Fish shell
 print_status "Installing Fish shell..."
@@ -155,10 +156,21 @@ else
     print_status "pnpm already installed"
 fi
 
+# Install uv (Python package manager)
+# UV_NO_MODIFY_PATH=1 prevents uv from appending broken source lines to .bashrc/.profile
+# (~/.local/bin is already in PATH via .profile, so uv is accessible without modification)
+print_status "Installing uv..."
+if ! command -v uv &> /dev/null; then
+    curl -LsSf https://astral.sh/uv/install.sh | UV_NO_MODIFY_PATH=1 sh
+else
+    print_status "uv already installed"
+fi
+
 # Change default shell to fish
 print_status "Setting fish as default shell..."
-if [ "$SHELL" != "$(which fish)" ]; then
-    chsh -s "$(which fish)"
+FISH_PATH="$(which fish)"
+if [ "$SHELL" != "$FISH_PATH" ]; then
+    sudo usermod -s "$FISH_PATH" "$USER"
     print_status "Default shell changed to fish. You'll need to log out and back in for this to take effect."
 else
     print_status "Fish is already the default shell"
