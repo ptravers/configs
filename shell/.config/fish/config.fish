@@ -24,15 +24,6 @@ if status is-interactive
         set fish_function_path $fish_function_path ~/dev/others/base16/templates/fish-shell/functions
         builtin source ~/dev/others/base16/templates/fish-shell/conf.d/base16.fish
     end
-    switch $TERM
-        case linux
-            :
-        case '*'
-            if ! set -q TMUX
-                # ensure that the new tmux _also_ starts fish
-                exec tmux set-option -g default-shell (which fish) ';' new-session
-            end
-    end
 end
 
 if command -v eza >/dev/null
@@ -219,3 +210,20 @@ end
 function jjpr --wraps='jj show' --description 'Opens the PR for a change in Linear' --argument-names change
     linctl pr view (gh pr view (jj bookmark list -T name -r $change) --json number -q '.number')
 end
+
+# nvm - add current node version to PATH
+set -gx NVM_HOME "/home/peter/.local/share/nvm"
+if test -d $NVM_HOME
+  set -l node_version (ls -1t $NVM_HOME | grep '^v' | head -1)
+  if test -n "$node_version"
+    set -gx PATH "$NVM_HOME/$node_version/bin" $PATH
+  end
+end
+# nvm end
+
+# pnpm
+set -gx PNPM_HOME "/home/peter/.local/share/pnpm"
+if not string match -q -- $PNPM_HOME $PATH
+  set -gx PATH "$PNPM_HOME" $PATH
+end
+# pnpm end

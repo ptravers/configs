@@ -29,3 +29,5 @@ case ":$PATH:" in
 esac
 # pnpm end
 
+fish
+
